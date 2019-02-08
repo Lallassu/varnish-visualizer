@@ -1,0 +1,13 @@
+{
+    "name": "varnish-visualizer",
+    "version": "0.1",
+    "description": "3D Visualizer of Varnish traffic.",
+    "dependencies": {
+        "amqplib": "^0.5.3",
+        "express": "^4.16.4",
+        "socket.io": "^1.7.4"
+    },
+    "scripts": {
+        "start": "node server.js"
+    }
+}

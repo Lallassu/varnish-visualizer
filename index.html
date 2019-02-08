@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <title>Varnish 3D Visualizer</title>
+    <meta charset="utf-8">
+    <style type="text/css">
+        html {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000000 url(loading.gif) center center no-repeat;
+            color: #ffffff;
+            font-family: sans-serif;
+            font-size: 13px;
+            line-height: 20px;
+            height: 100%;
+        }
+
+        #info {
+            font-size: 11px;
+            position: absolute;
+            bottom: 5px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 3px;
+            right: 10px;
+            padding: 10px;
+
+        }
+
+        #current {
+            width: 270px;
+            position: absolute;
+            left: 20px;
+            top: 63px;
+
+            background-color: rgba(0, 0, 0, 0.2);
+
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 10px;
+        }
+
+        a {
+            color: #aaa;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #title {
+            position: absolute;
+            top: 20px;
+            width: 270px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            font: 20px Georgia;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+
+    <div id="info">
+        <strong><a target="_blank" href="https://github.com/lallassu">https://github.com/lallassu</a></strong>
+    </div>
+
+    <div id="title">
+        Varnish Realtime Traffic
+    </div>
+    <div id="current">
+        <table>
+            <thead>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Client.IP</th>
+                <th>Country</th>
+                <th>Lat/Lon</th>
+            </thead>
+            <tbody id="tb">
+            </tbody>
+        </table>
+    </div>
+
+    <script type="text/javascript" src="/third-party/Detector.js"></script>
+    <script type="text/javascript" src="/third-party/three.min.js"></script>
+    <script type="text/javascript" src="/third-party/Tween.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        var globe = 0;
+        var traffic = [];
+        $(function () {
+            var socket = io();
+            socket.on('data', function (data) {
+                if (globe != 0) {
+                    var m = data.msg.split("|");
+                    var ll = m[2].split(",");
+                    var color = 0xFF0000;
+                    if (m[3] == "hit") {
+                        color = 0x00FF00;
+                    }
+                    var time = new Date().toLocaleDateString(undefined, {
+                        hour: 'numeric',
+                        minute: 'numeric',
+                        second: 'numeric'
+                    })
+                    traffic.push({ time: time.split(",")[1], type: m[3], pos: ll, country: m[1], ip: m[0] });
+                    if (traffic.length > 10) {
+                        traffic.shift();
+                    }
+                    UpdateTrafficTable();
+                    globe.addPoint(ll[0], ll[1], color);
+                }
+            });
+        });
+
+        function UpdateTrafficTable() {
+            $('#tb').html = "";
+            var rows = "";
+            for (var i = 0; i < traffic.length; i++) {
+                var rcolor = "#FF5555";
+                if (traffic[i].type == "hit") {
+                    rcolor = "#55FF55";
+                }
+                rows += "<tr style='color: " + rcolor + ";'>";
+                rows += "<td>" + traffic[i].time + "</td>";
+                rows += "<td>" + traffic[i].type + "</td>";
+                rows += "<td>" + traffic[i].ip + "</td>";
+                rows += "<td>" + traffic[i].country + "</td>";
+                rows += "<td>" + traffic[i].pos + "</td>";
+                rows += "</tr>";
+            }
+            $('#tb').html(rows);
+        }
+        if (!Detector.webgl) {
+            Detector.addGetWebGLMessage();
+        } else {
+            var globe = new Globe();
+            globe.Init()
+        }
+    </script>
+</body>
+
+</html>
