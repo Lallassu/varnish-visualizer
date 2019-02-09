@@ -8,7 +8,15 @@ Required VMODs:
 
 Developed for Varnish 5.2.x and not for production!
 
-Required a default installation of RabbitMQ and Varnish.
+Required a default installation of RabbitMQ and Varnish. The queue for RabbitMQ has been configured with a TTL of 3 seconds.
+
+It uses a nodejs server as a backend that sends out data to clients using socket.io. To run the server:
+    nodejs server.js
+
+## Demo
+Using this on my http://webgl.nu site and it can be seen by opening up your browser on:
+    http://webgl.nu:3000
+and then go to http://webgl.nu too see traffic if no one else is currently surfing the site.
 
 ## VCL Used
     vcl 4.0;
