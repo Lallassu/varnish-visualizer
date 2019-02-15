@@ -31,8 +31,10 @@ const child = spawn('varnishncsa', ['-F', '%{VSL:ReqHeader:x-cache[1]}x|%{VSL:Re
 		var d = data.toString().split("|");
 		var ip = d[0];
 		var geo = geoip.lookup(ip);
-		io.emit("data", { msg: ip+"|"+ geo.city+"|"+geo.ll[0]+","+geo.ll[1]+"|"+d[1] });
-		console.log(ip+"|"+ geo.city+"|"+geo.ll[0]+","+geo.ll[1]+"|"+d[1]);
+		if (geo != null ) {
+			io.emit("data", { msg: ip+"|"+ geo.city+"|"+geo.ll[0]+","+geo.ll[1]+"|"+d[1] });
+			//console.log(ip+"|"+ geo.city+"|"+geo.ll[0]+","+geo.ll[1]+"|"+d[1]);
+		}
   };
   try{
   }catch(e){
