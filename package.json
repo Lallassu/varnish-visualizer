@@ -6,7 +6,8 @@
         "amqplib": "^0.5.3",
         "express": "^4.16.4",
         "geoip-lite": "^1.3.6",
-        "socket.io": "^1.7.4"
+        "socket.io": "^2.2.0",
+        "websocket": "^1.0.28"
     },
     "scripts": {
         "start": "node server.js"

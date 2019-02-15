@@ -28,7 +28,10 @@ const child = spawn('varnishncsa', ['-F', '%{VSL:ReqHeader:x-cache[1]}x|%{VSL:Re
 // Async Iteration available since Node 10
 (async () => {
 	for await (const data of child.stdout) {
-		var d = data.toString().split("|");
+		if (data.toString().match("-") != null ) {
+			continue;
+		}
+		var d = data.toString().replace(/\n/, '').split("|");
 		var ip = d[0];
 		var geo = geoip.lookup(ip);
 		if (geo != null ) {

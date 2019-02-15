@@ -92,7 +92,7 @@
     <script type="text/javascript" src="/third-party/Detector.js"></script>
     <script type="text/javascript" src="/third-party/three.min.js"></script>
     <script type="text/javascript" src="main.js"></script>
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
         var globe = 0;
@@ -104,7 +104,7 @@
                     var m = data.msg.split("|");
                     var ll = m[2].split(",");
                     var color = 0xFF0000;
-                    if (m[3] == "hit") {
+                    if (m[3].match("hit") != null) {
                         color = 0x00FF00;
                     }
                     var time = new Date().toLocaleDateString(undefined, {
@@ -127,7 +127,7 @@
             var rows = "";
             for (var i = 0; i < traffic.length; i++) {
                 var rcolor = "#FF5555";
-                if (traffic[i].type == "hit") {
+                if (traffic[i].type.match("hit") != null) {
                     rcolor = "#55FF55";
                 }
                 rows += "<tr style='color: " + rcolor + ";'>";
