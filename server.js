@@ -17,10 +17,28 @@ var port = 3000;
 //======================================================
 var server = require("http");
 var express = require('express');
-var amqp = require('amqplib/callback_api');
+// var amqp = require('amqplib/callback_api'); // For use with RabbitMQ
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var geoip = require('geoip-lite');
+const { spawn } = require('child_process')
+const child = spawn('varnishncsa', ['-F', '%{VSL:ReqHeader:x-cache[1]}x|%{VSL:ReqHeader:x-cache[2]}x']);
+
+// Async Iteration available since Node 10
+(async () => {
+	for await (const data of child.stdout) {
+		var d = data.toString().split("|");
+		var ip = d[0];
+		var geo = geoip.lookup(ip);
+		io.emit("data", { msg: ip+"|"+ geo.city+"|"+geo.ll[0]+","+geo.ll[1]+"|"+d[1] });
+		console.log(ip+"|"+ geo.city+"|"+geo.ll[0]+","+geo.ll[1]+"|"+d[1]);
+  };
+  try{
+  }catch(e){
+    console.log(e.stack);
+  }
+})();
 
 console.log("===================================");
 console.log("Server for Varnish Visualizer");
@@ -35,22 +53,23 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
-amqp.connect('amqp://test:test@127.0.0.1:5672', function (err, conn) {
-    if (conn == null) {
-        console.log(err);
-        console.log("Failed to connect o RabbitMQ.")
-        process.exit(-1);
-    }
-    conn.createChannel(function (err, ch) {
-        var q = 'test';
-
-        ch.assertQueue(q, { durable: false });
-        console.log("Waiting for messages in queue %s.", q);
-        ch.consume(q, function (msg) {
-            io.emit("data", { msg: msg.content.toString() });
-        }, { noAck: true });
-    });
-});
+// For use with RabbitMQ VMOD
+//amqp.connect('amqp://test:test@127.0.0.1:5672', function (err, conn) {
+//    if (conn == null) {
+//        console.log(err);
+//        console.log("Failed to connect o RabbitMQ.")
+//        process.exit(-1);
+//    }
+//    conn.createChannel(function (err, ch) {
+//        var q = 'test';
+//
+//        ch.assertQueue(q, { durable: false });
+//        console.log("Waiting for messages in queue %s.", q);
+//        ch.consume(q, function (msg) {
+//            io.emit("data", { msg: msg.content.toString() });
+//        }, { noAck: true });
+//    });
+//});
 
 io.on('connection', function (socket) {
     var ip = socket.handshake.address;

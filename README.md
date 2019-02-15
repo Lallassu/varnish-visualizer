@@ -2,7 +2,7 @@
 
 Visualize cache hits/misses in a Varnish cache. It uses VCL and two VMODs to do this.
 
-Required VMODs:
+Required VMODs (if not using the varnishncsa version):
 - RabbitMQ: https://github.com/Lallassu/libvmod-rmq.git
 - GeoIP(with lat/long support): https://github.com/Lallassu/libvmod-geoip.git
 
@@ -15,10 +15,31 @@ It uses a nodejs server as a backend that sends out data to clients using socket
 
 ## Demo
 Using this on my http://webgl.nu site and it can be seen by opening up your browser on:
-    http://webgl.nu:3000
+    http://varnish.webgl.nu
 and then go to http://webgl.nu too see traffic if no one else is currently surfing the site.
 
-## VCL Used
+## VCL Used for varnishncsa
+    vcl 4.0;
+    
+    backend default {
+        .host = "127.0.0.1";
+        .port = "8888";
+    }
+    
+    sub vcl_recv {
+    	unset req.http.x-cache;
+    	unset req.http.Cookie;
+    }
+    
+    sub vcl_hit {
+    	set req.http.x-cache = client.ip+" hit";
+    }
+    
+    sub vcl_miss {
+    	set req.http.x-cache = client.ip+" miss";
+    }
+
+## VCL For RabbitMQ VMOD
     vcl 4.0;
     import geoip;
     import rmq;
